@@ -6,10 +6,13 @@ export class Category {
     @PrimaryGeneratedColumn()
     category_id : number;
 
-    @Column({nullable: false, default: 'New Category'})
+    @Column({nullable: false,})
     category_name : string;
 
-    @Column({}) 
+    @Column({ nullable: true })
+    category_image_url : string;
+
+    @Column({ nullable: true }) 
     category_description : string;
 
     @OneToMany(() => Dish, dish => dish.category)
