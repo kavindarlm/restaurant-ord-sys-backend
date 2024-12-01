@@ -8,6 +8,7 @@ import { Order } from "src/order/entities/order.entity";
 import { Payment } from "src/payment/entities/payment.entity";
 import { Table } from "src/table/entities/table.entity";
 import { User } from "src/user/entities/user.entity";
+import { DishPrice } from '../dish/entities/dish_price.entity';
 
 export const typeOrmConfig: TypeOrmModuleOptions ={
     type: 'mysql',
@@ -17,7 +18,7 @@ export const typeOrmConfig: TypeOrmModuleOptions ={
     password: 'Hotel@55',
     database: 'hotel-db-1',
     entities: [
-        Cart,CartItem,Category,Dish,Order,Payment,Table,User
+        Cart,CartItem,Category,Dish,Order,Payment,Table,User,DishPrice
     ],
     synchronize: true,
     ssl: true,

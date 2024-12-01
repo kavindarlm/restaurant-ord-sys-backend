@@ -1,4 +1,5 @@
 export class CreateCategoryDto {
-  name: string;
-  description?: string;
+  category_name: string;
+  category_description?: string;
+  category_image_url?: string;
 }

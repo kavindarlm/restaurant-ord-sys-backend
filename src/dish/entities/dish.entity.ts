@@ -1,6 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
 import { Category } from "../../category/entities/category.entity";
 import { CartItem } from "../../cart_items/entities/cart_item.entity";
+import { DishPrice } from "./dish_price.entity";
 
 @Entity('dishes')
 export class Dish {
@@ -9,9 +10,6 @@ export class Dish {
 
     @Column({nullable: false, default: 'New Dish'})
     dish_name : string;
-
-    @Column({})
-    dish_price : number;
 
     @Column({})
     dish_description : string;
@@ -24,4 +22,7 @@ export class Dish {
 
     @OneToMany(() => CartItem, cartItem => cartItem.dish)
     cartItems: CartItem[];
+
+    @OneToMany(() => DishPrice, dishPrice => dishPrice.dish)
+    dishPrices: DishPrice[];
 }
