@@ -1,15 +1,48 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateDishDto } from './dto/create-dish.dto';
 import { UpdateDishDto } from './dto/update-dish.dto';
+import { Dish } from './entities/dish.entity';
+import { DishPrice } from './entities/dish_price.entity';
+import { Category } from '../category/entities/category.entity';
 
 @Injectable()
 export class DishService {
-  create(createDishDto: CreateDishDto) {
-    return 'This action adds a new dish';
+  constructor(
+    @InjectRepository(Dish)
+    private dishRepository: Repository<Dish>,
+    @InjectRepository(DishPrice)
+    private dishPriceRepository: Repository<DishPrice>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
+  ) {}
+
+  async create(createDishDto: CreateDishDto) {
+    const { dish_name, dish_description, dish_image_url, category_id, prices } = createDishDto;
+    const category = await this.categoryRepository.findOneBy({ category_id });
+    const dish = this.dishRepository.create({ dish_name, dish_description, dish_image_url, category });
+    await this.dishRepository.save(dish);
+
+    const dishPrices = prices.map(price => this.dishPriceRepository.create({ ...price, dish }));
+    await this.dishPriceRepository.save(dishPrices);
+
+    return dish;
   }
 
-  findAll() {
-    return `This action returns all dish`;
+  async findAll() {
+    return await this.dishRepository.find({ relations: ['category', 'dishPrices'] });
+  }
+
+  async findByCategoryId(category_id: number) {
+    const dishes = await this.dishRepository.find({
+      where: { category: { category_id } },
+      relations: ['category', 'dishPrices'],
+    });
+    return dishes.map(dish => ({
+      ...dish,
+      category_id: dish.category.category_id,
+    }));
   }
 
   findOne(id: number) {

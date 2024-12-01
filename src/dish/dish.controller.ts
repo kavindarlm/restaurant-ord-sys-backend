@@ -22,6 +22,11 @@ export class DishController {
     return this.dishService.findOne(+id);
   }
 
+  @Get('category/:category_id')
+  findByCategoryId(@Param('category_id') category_id: string) {
+    return this.dishService.findByCategoryId(+category_id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDishDto: UpdateDishDto) {
     return this.dishService.update(+id, updateDishDto);
