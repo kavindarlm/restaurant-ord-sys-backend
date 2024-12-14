@@ -9,6 +9,9 @@ export class Table {
     @Column({nullable: false, default: 'New Table'})
     table_name : string;
 
+    @Column({ type: 'text', nullable: true })
+    qr_code: string;
+
     @OneToMany(() => Cart, cart => cart.table)
     carts: Cart[];
 }

@@ -1,1 +1,3 @@
-export class CreateTableDto {}
+export class CreateTableDto {
+    table_name: string;
+}
