@@ -11,9 +11,10 @@ import { PaymentModule } from './payment/payment.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { CartItemsModule } from './cart_items/cart_items.module';
+import { StripePaymentModule } from './stripe_payment/stripe_payment.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig),CategoryModule, DishModule, TableModule, OrderModule, UserModule, CartModule, PaymentModule, CartItemsModule],
+  imports: [TypeOrmModule.forRoot(typeOrmConfig),CategoryModule, DishModule, TableModule, OrderModule, UserModule, CartModule, PaymentModule, CartItemsModule,StripePaymentModule],
   controllers: [AppController],
   providers: [AppService],
 })
