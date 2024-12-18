@@ -1,5 +1,4 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { table } from "console";
 import { Cart } from "src/cart/entities/cart.entity";
 import { CartItem } from "src/cart_items/entities/cart_item.entity";
 import { Category } from "src/category/entities/category.entity";
