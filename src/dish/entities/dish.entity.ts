@@ -25,4 +25,7 @@ export class Dish {
 
     @OneToMany(() => DishPrice, dishPrice => dishPrice.dish)
     dishPrices: DishPrice[];
+
+    @Column({default: true})
+    is_available: boolean;
 }

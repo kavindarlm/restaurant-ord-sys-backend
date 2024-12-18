@@ -27,6 +27,11 @@ export class DishController {
     return this.dishService.findByCategoryId(+category_id);
   }
 
+  @Post('toggle-availability/:id')
+  toggleAvailability(@Param('id') id: string) {
+    return this.dishService.toggleAvailability(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDishDto: UpdateDishDto) {
     return this.dishService.update(+id, updateDishDto);
