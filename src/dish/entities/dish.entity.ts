@@ -28,4 +28,7 @@ export class Dish {
 
     @Column({default: true})
     is_available: boolean;
+
+    @Column({default: false})
+    is_deleted: boolean;
 }

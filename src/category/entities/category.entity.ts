@@ -15,6 +15,9 @@ export class Category {
     @Column({ nullable: true }) 
     category_description : string;
 
+    @Column({default: false})
+    is_deleted: boolean;
+
     @OneToMany(() => Dish, dish => dish.category)
     dishes: Dish[];
 }
