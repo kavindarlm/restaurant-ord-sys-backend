@@ -46,7 +46,16 @@ export class DishService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} dish`;
+    return this.dishRepository.findOne({ where: { dish_id: id }, relations: ['category', 'dishPrices'] });
+  }
+
+  async toggleAvailability(id: number) {
+    const dish = await this.dishRepository.findOne({ where: { dish_id: id } });
+    if (dish) {
+      dish.is_available = !dish.is_available;
+      await this.dishRepository.save(dish);
+    }
+    return dish;
   }
 
   update(id: number, updateDishDto: UpdateDishDto) {
