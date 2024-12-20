@@ -23,4 +23,7 @@ export class Cart {
 
     @Column({ default: false })
     is_active: boolean;
+
+    @Column({default: false})
+    is_deleted: boolean;
 }
