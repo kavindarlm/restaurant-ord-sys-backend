@@ -12,6 +12,9 @@ export class Table {
     @Column({ type: 'text', nullable: true })
     qr_code: string;
 
+    @Column({default: false})
+    is_deleted: boolean;
+
     @OneToMany(() => Cart, cart => cart.table)
     carts: Cart[];
 }

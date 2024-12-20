@@ -13,6 +13,9 @@ export class CartItem {
     @Column()
     dish_id: number;
 
+    @Column({default: false})
+    is_deleted: boolean;
+
     @ManyToOne(() => Dish, dish => dish.cartItems)
     dish: Dish;
 

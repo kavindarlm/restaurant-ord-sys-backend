@@ -16,4 +16,7 @@ export class User {
 
     @Column({})
     user_role : string;
+
+    @Column({default: false})
+    is_deleted: boolean;
 }
