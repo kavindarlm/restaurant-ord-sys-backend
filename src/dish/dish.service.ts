@@ -65,4 +65,11 @@ export class DishService {
   remove(id: number) {
     return `This action removes a #${id} dish`;
   }
+
+  async getDishNameById(dishId: number): Promise<string> {
+    const dish = await this.dishRepository.findOne({
+      where: { dish_id: dishId },
+    });
+    return dish?.dish_name || 'Unknown Dish';
+  }
 }

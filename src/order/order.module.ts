@@ -8,15 +8,18 @@ import { CartModule } from '../cart/cart.module';  // Import CartModule
 import { Payment } from 'src/payment/entities/payment.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { CartService } from 'src/cart/cart.service';
+import { DishService } from 'src/dish/dish.service';
+import { DishModule } from 'src/dish/dish.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order,Payment,Cart]),
     PaymentModule,  // Add PaymentModule to imports
-    CartModule,  // Add CartModule to imports
+    CartModule,
+    DishModule // Add CartModule to imports
   ],
   controllers: [OrderController],
-  providers: [OrderService, CartService],
+  providers: [OrderService, CartService, DishService],
   exports: [OrderService],
 })
 export class OrderModule {}
