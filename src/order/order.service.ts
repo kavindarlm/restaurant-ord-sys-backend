@@ -95,7 +95,7 @@ export class OrderService {
           order_id: order.order_id,
           order_status: order.order_status,
           order_items: orderItems,
-          table_no: 2,
+          table_no: 6,
           order_time: order.order_time
         };
       }),
