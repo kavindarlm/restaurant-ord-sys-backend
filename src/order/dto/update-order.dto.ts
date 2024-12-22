@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create-order.dto';
-
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class UpdateOrderStateDto {
+    readonly order_status: string; // The new order status to be updated
+  }
