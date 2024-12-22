@@ -39,6 +39,7 @@ export class OrderService {
       is_deleted: false,
       payment,
       cart,
+      order_time: new Date(),  // Set the order_time to the current date and time
     });
 
     return await this.orderRepository.save(order);
