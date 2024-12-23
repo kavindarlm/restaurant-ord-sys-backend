@@ -21,7 +21,7 @@ export class TableService {
       await this.tableRepository.save(table);
 
       // Generate QR code for the table
-      const qrData = `http://localhost:3000/order/${table.table_id}`;
+      const qrData = `http://localhost:3000/hotelMenuPageCustomer/${table.table_id}`;
       const qrCode = await QRCode.toDataURL(qrData);
 
       // Save the QR code URL to the table

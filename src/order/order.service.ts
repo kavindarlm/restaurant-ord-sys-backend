@@ -95,7 +95,7 @@ export class OrderService {
           order_id: order.order_id,
           order_status: order.order_status,
           order_items: orderItems,
-          table_no: 6,
+          table_no: order.cart.table.table_id,
           order_time: order.order_time
         };
       }),
@@ -152,7 +152,7 @@ export class OrderService {
       const income = await this.orderRepository
         .createQueryBuilder('order')
         .select('SUM(order.totale_price)', 'totalIncome')
-        .where('order.order_status = :status', { status: 'Complete' })
+        // .where('order.order_status = :status', { status: 'Complete' })
         .andWhere('order.order_time >= :today', { today: today.toISOString() })
         .andWhere('order.order_time < :tomorrow', { tomorrow: tomorrow.toISOString() })
         .getRawOne();

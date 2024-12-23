@@ -4,16 +4,21 @@ import { Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { Table } from 'src/table/entities/table.entity'; 
 
 @Injectable()
 export class CartService {
   constructor(
-    @InjectRepository(Cart)
-    private cartRepository: Repository<Cart>,
+    @InjectRepository(Cart) private readonly cartRepository: Repository<Cart>,
+    @InjectRepository(Table) private readonly tableRepository: Repository<Table>,  // Inject TableRepository
   ) {}
 
   async create(createCartDto: CreateCartDto): Promise<Cart> {
-    const cart = this.cartRepository.create(createCartDto);
+    const table = await this.tableRepository.findOne({ where: { table_id: createCartDto.table_id } });
+    if (!table) {
+      throw new NotFoundException(`Table with ID ${createCartDto.table_id} not found`);
+    }
+    const cart = this.cartRepository.create({ ...createCartDto, table });
     return await this.cartRepository.save(cart);
   }
 
