@@ -227,7 +227,7 @@ export class OrderService {
         .createQueryBuilder('order')
         .select('DAYOFWEEK(order.order_time) AS dayOfWeek') // Use DAYOFWEEK() here
         .addSelect('SUM(order.totale_price)', 'totalIncome')
-        .where('order.order_status = :status', { status: 'Complete' })
+        // .where('order.order_status = :status', { status: 'Complete' })
         .andWhere('order.order_time >= :startOfWeek', { startOfWeek: startOfWeek.toISOString() })
         .andWhere('order.order_time <= :endOfWeek', { endOfWeek: endOfWeek.toISOString() })
         .groupBy('dayOfWeek')
