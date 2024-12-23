@@ -10,5 +10,6 @@ import { Category } from '../category/entities/category.entity';
   imports: [TypeOrmModule.forFeature([Dish, DishPrice, Category])],
   controllers: [DishController],
   providers: [DishService],
+  exports: [DishService, TypeOrmModule],
 })
 export class DishModule {}

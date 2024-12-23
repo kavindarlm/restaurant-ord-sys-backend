@@ -4,7 +4,7 @@ import { Order } from "../../order/entities/order.entity";
 import { Table } from "../../table/entities/table.entity";
 
 @Entity('carts')
-@Unique(['table', 'is_active'])
+// @Unique(['table', 'is_active'])
 export class Cart {
     @PrimaryGeneratedColumn()
     cart_id : number;
