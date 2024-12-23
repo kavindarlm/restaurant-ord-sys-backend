@@ -8,14 +8,17 @@ import { Payment } from "src/payment/entities/payment.entity";
 import { Table } from "src/table/entities/table.entity";
 import { User } from "src/user/entities/user.entity";
 import { DishPrice } from '../dish/entities/dish_price.entity';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export const typeOrmConfig: TypeOrmModuleOptions ={
     type: 'mysql',
-    host: 'dbm-project.mysql.database.azure.com',
-    port: 3306,
-    username: 'hotel',
-    password: 'Hotel@55',
-    database: 'hotel-db-1',
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT, 10),
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     entities: [
         Cart,CartItem,Category,Dish,Order,Payment,Table,User,DishPrice
     ],
