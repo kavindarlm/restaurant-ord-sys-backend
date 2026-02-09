@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe'; // Importing directly
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class StripePaymentService {
   private stripe: Stripe;
 
   constructor() {
-    this.stripe = new Stripe('sk_test_51QRSxBRvJVs0SdRcGXOoKmClH1LOu0oZ0HHkXSrGkcRmNL7XoeBRcu9W3EqyJyyHLXhgnajdQE79zAF1OC4FksU400nhpehCRK', {
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-11-20.acacia', // Use the correct version
     });
   }
