@@ -2,9 +2,20 @@
 import { Module } from '@nestjs/common';
 import { StripePaymentService } from './stripe_payment.service';
 import { StripePaymentController } from './stripe_payment.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Cart } from 'src/cart/entities/cart.entity';
+import { CartItem } from 'src/cart_items/entities/cart_item.entity';
+import { DishPrice } from 'src/dish/entities/dish_price.entity';
 
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      Cart,
+      CartItem,
+      DishPrice,
+    ]),
+  ],
   controllers: [StripePaymentController],
   providers: [StripePaymentService],
 })
