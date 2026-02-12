@@ -14,7 +14,7 @@ interface CustomRequest extends Request {
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   constructor(private readonly securityLogger: SecurityLoggerService) {}
-
+  // This filter catches all exceptions thrown in the application. It checks if the exception is an instance of HttpException and logs relevant security events based on the status code and response message.
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<CustomRequest>();
