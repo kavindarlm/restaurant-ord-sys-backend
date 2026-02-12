@@ -6,6 +6,7 @@ import { Cart } from 'src/cart/entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart_items/entities/cart_item.entity';
 import { DishPrice } from 'src/dish/entities/dish_price.entity';
+import { SecurityLoggerService } from 'src/security-logging/security-logger.service';
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ export class StripePaymentService {
 
     @InjectRepository(DishPrice)
     private dishPriceRepo: Repository<DishPrice>,
+
+    private readonly securityLogger: SecurityLoggerService,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-11-20.acacia',
@@ -29,8 +32,7 @@ export class StripePaymentService {
   }
 
   // Create a payment intent
-  async createPaymentIntent(cartId: number, currency: string) {
-
+  async createPaymentIntent(cartId: number, currency: string, totalAmount: number) {
     const cart = await this.cartRepo.findOne({
       where: { cart_id: cartId, is_deleted: false },
     });
@@ -73,28 +75,39 @@ export class StripePaymentService {
 
     const amountInCents = Math.round(total * 100);
 
+    if (Math.abs(total - totalAmount) > 0.01) {
+      this.securityLogger.logPriceMismatch(
+        String(cartId),
+        total,         
+        totalAmount     
+      );
+      throw new BadRequestException('Cart total mismatch detected');
+    }
+
     if (amountInCents < 50 && currency === 'usd') {
       throw new BadRequestException('Amount too small for Stripe');
     }
 
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
-        
+
         amount: amountInCents, // Amount in cents
         currency: currency,
 
         metadata: {
-        cartId: String(cartId),
-      },
+          cartId: String(cartId),
+        },
       });
 
       return {
-      clientSecret: paymentIntent.client_secret,
-      amount: total,        // for UI display only
-      cartId: cartId,
+        clientSecret: paymentIntent.client_secret,
+        amount: total,        // for UI display only
+        cartId: cartId,
       };
     } catch (error) {
-      // throw new Error(`Error creating payment intent: ${error.message}`);
+      if (error) {
+          throw new BadRequestException(`Error creating payment intent: ${error.message}`);
+      }
     }
   }
 }
