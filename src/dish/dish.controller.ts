@@ -1,15 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { DishService } from './dish.service';
 import { CreateDishDto } from './dto/create-dish.dto';
 import { UpdateDishDto } from './dto/update-dish.dto';
+import { FileValidationPipe } from '../upload/pipes/file-validation.pipe';
+import { memoryStorage } from 'multer';
 
 @Controller('dish')
 export class DishController {
   constructor(private readonly dishService: DishService) {}
 
   @Post()
-  create(@Body() createDishDto: CreateDishDto) {
-    return this.dishService.create(createDishDto);
+  @UseInterceptors(FileInterceptor('file', {
+    storage: memoryStorage(),
+  }))
+  create(
+    @UploadedFile(FileValidationPipe) file: Express.Multer.File,
+    @Body() createDishDto: CreateDishDto,
+  ) {
+    return this.dishService.create(createDishDto, file);
   }
 
   @Get()
