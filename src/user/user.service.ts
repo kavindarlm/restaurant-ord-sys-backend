@@ -45,25 +45,31 @@ export class UserService {
   }
 
   async login(loginUserDto: LoginUserDto): Promise<string> {
-    const user = await this.userRepository.findOne({ where: { user_email: loginUserDto.user_email } });
-    if (!user || !user.user_password) {
-      throw new Error('Invalid email or password');
-    }
-    if (!loginUserDto.user_password) {
-      throw new Error('Invalid email or password');
-    }
-    const isPasswordValid = await bcrypt.compare(loginUserDto.user_password, user.user_password);
-    if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
-    }
-    const payload = { email: user.user_email, sub: user.user_id, role: user.user_role };
-    const token = this.jwtService.sign(payload);
-    console.log('Token:', token);
-    return token;
+  const user = await this.userRepository.findOne({
+    where: { user_email: loginUserDto.user_email },
+  });
+
+  if (!user) {
+    throw new Error('Invalid email or password');
   }
 
-  async logout(email: string): Promise<string> {
-    // Implement logout logic here, e.g., invalidate token
-    return 'Logout successful';
+  const isPasswordValid = await bcrypt.compare(
+    loginUserDto.user_password,
+    user.user_password
+  );
+
+  if (!isPasswordValid) {
+    throw new Error('Invalid email or password');
   }
+
+  const payload = {
+    email: user.user_email,
+    sub: user.user_id,
+    role: user.user_role,
+  };
+
+  return this.jwtService.sign(payload);
+}
+
+
 }

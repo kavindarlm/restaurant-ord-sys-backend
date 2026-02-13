@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -34,12 +35,27 @@ export class UserController {
   }
 
   @Post('login')
-  login(@Body() loginUserDto: LoginUserDto) {
-    return this.userService.login(loginUserDto);
-  }
+async login(
+  @Body() loginUserDto: LoginUserDto,
+  @Res({ passthrough: true }) res: Response
+) {
+  const token = await this.userService.login(loginUserDto);
+
+  res.cookie('access_token', token, {
+    httpOnly: true,
+    secure: false,        // true in production (HTTPS)
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 1000 // 1 hour
+  });
+
+  return { message: 'Login successful' };
+}
+
 
   @Post('logout')
-  logout(@Body('email') email: string) {
-    return this.userService.logout(email);
-  }
+logout(@Res({ passthrough: true }) res: Response) {
+  res.clearCookie('access_token');
+  return { message: 'Logout successful' };
+}
+
 }
