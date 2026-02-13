@@ -11,6 +11,9 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
+  private readonly MAX_LOGIN_ATTEMPTS = 3;
+  private readonly LOCK_TIME_MINUTES = 1;
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -59,7 +62,7 @@ export class UserService {
     if (user.locked_until) {
       const lockedUntil = new Date(user.locked_until);
       
-      // Check if 15 minutes have passed since lock
+      // Check if lock time has passed
       if (now < lockedUntil) {
         // Account is still locked
         const remainingMs = lockedUntil.getTime() - now.getTime();
@@ -80,16 +83,16 @@ export class UserService {
       // Increment failed login attempts
       user.failed_login_attempts += 1;
 
-      // Lock account if failed attempts reach 3
-      if (user.failed_login_attempts >= 3) {
-        const lockUntil = new Date(now.getTime() + 15 * 60000); // 15 minutes from now
+      // Lock account if failed attempts reach MAX_LOGIN_ATTEMPTS
+      if (user.failed_login_attempts >= this.MAX_LOGIN_ATTEMPTS) {
+        const lockUntil = new Date(now.getTime() + this.LOCK_TIME_MINUTES * 60000);
         user.locked_until = lockUntil;
         await this.userRepository.save(user);
-        throw new UnauthorizedException('Account locked due to multiple failed login attempts. Please try again after 15 minutes.');
+        throw new UnauthorizedException(`Account locked due to multiple failed login attempts. Please try again after ${this.LOCK_TIME_MINUTES} minutes.`);
       }
 
       await this.userRepository.save(user);
-      throw new UnauthorizedException(`Invalid email or password. ${3 - user.failed_login_attempts} attempt(s) remaining before account lock.`);
+      throw new UnauthorizedException(`Invalid email or password. ${this.MAX_LOGIN_ATTEMPTS - user.failed_login_attempts} attempt(s) remaining before account lock.`);
     }
 
     // Successful login - reset failed attempts
