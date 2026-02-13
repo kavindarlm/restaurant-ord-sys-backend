@@ -11,6 +11,7 @@ import { CartService } from 'src/cart/cart.service';
 import { DishModule } from 'src/dish/dish.module';
 import { Table } from 'src/table/entities/table.entity';
 import { TableModule } from 'src/table/table.module';
+import { EncryptionService } from 'src/common/encryption.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { TableModule } from 'src/table/table.module';
     TableModule // Add CartModule to imports
   ],
   controllers: [OrderController],
-  providers: [OrderService, CartService],
+  providers: [OrderService, CartService, EncryptionService],
   exports: [OrderService],
 })
 export class OrderModule {}

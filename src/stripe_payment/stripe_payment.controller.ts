@@ -9,7 +9,7 @@ export class StripePaymentController {
 
   // Endpoint to create a payment intent
   @Post('create-payment-intent')
-  async createPaymentIntent(@Body() body: { cartId: number, currency: string, totalAmount: number }) {
+  async createPaymentIntent(@Body() body: { cartId: string, currency: string, totalAmount: number }) {
     const { cartId, currency, totalAmount } = body;
  
     // Call service to create a payment intent
