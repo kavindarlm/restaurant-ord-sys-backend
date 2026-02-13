@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDishDto } from './dto/create-dish.dto';
@@ -6,6 +6,7 @@ import { UpdateDishDto } from './dto/update-dish.dto';
 import { Dish } from './entities/dish.entity';
 import { DishPrice } from './entities/dish_price.entity';
 import { Category } from '../category/entities/category.entity';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class DishService {
@@ -16,18 +17,48 @@ export class DishService {
     private dishPriceRepository: Repository<DishPrice>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private uploadService: UploadService,
   ) {}
 
-  async create(createDishDto: CreateDishDto) {
-    const { dish_name, dish_description, dish_image_url, category_id, prices } = createDishDto;
+  async create(createDishDto: CreateDishDto, file?: Express.Multer.File) {
+    const { dish_name, dish_description, category_id, prices } = createDishDto;
+    
+    // Upload image to Supabase if file is provided
+    let dish_image_url = null;
+    if (file) {
+      dish_image_url = await this.uploadService.uploadDishImage(file);
+    }
+
+    // Parse prices if it's a JSON string (from form-data)
+    let parsedPrices: { size: string, price: number }[];
+    if (typeof prices === 'string') {
+      try {
+        parsedPrices = JSON.parse(prices);
+      } catch (error) {
+        throw new BadRequestException('Invalid prices format. Must be valid JSON array.');
+      }
+    } else {
+      parsedPrices = prices;
+    }
+
+    // Get category and create dish
     const category = await this.categoryRepository.findOneBy({ category_id });
+    if (!category) {
+      throw new BadRequestException(`Category with id ${category_id} not found`);
+    }
+
     const dish = this.dishRepository.create({ dish_name, dish_description, dish_image_url, category });
     await this.dishRepository.save(dish);
 
-    const dishPrices = prices.map(price => this.dishPriceRepository.create({ ...price, dish }));
+    // Create dish prices
+    const dishPrices = parsedPrices.map(price => this.dishPriceRepository.create({ ...price, dish }));
     await this.dishPriceRepository.save(dishPrices);
 
-    return dish;
+    return {
+      success: true,
+      message: 'Dish created successfully',
+      data: dish,
+    };
   }
 
   async findAll() {

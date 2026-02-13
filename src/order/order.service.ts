@@ -7,6 +7,7 @@ import { CartService } from '../cart/cart.service';  // Import CartService
 import { CreateOrderDto } from './dto/create-order.dto';
 import { DishService } from 'src/dish/dish.service';
 import { UpdateOrderStateDto } from './dto/update-order.dto';
+import { EncryptionService } from 'src/common/encryption.service';
 
 @Injectable()
 export class OrderService {
@@ -16,6 +17,7 @@ export class OrderService {
     private readonly paymentService: PaymentService,
     private readonly cartService: CartService,
     private readonly dishService: DishService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   // Create order after payment is made
@@ -23,8 +25,11 @@ export class OrderService {
     // Step 1: Save payment details
     const payment = await this.paymentService.createPayment(createOrderDto.payment);
 
+    //decrypt cart_id and convert to number
+    const decryptedCartId = this.encryptionService.decrypt(createOrderDto.cart_id);
+
     // Step 2: Retrieve cart information by cart_id (sent from frontend)
-    const cart = await this.cartService.getCartById(createOrderDto.cart_id);
+    const cart = await this.cartService.getCartById(decryptedCartId);
 
     if (!cart) {
       throw new Error('Cart not found');
@@ -34,7 +39,7 @@ export class OrderService {
     const order = this.orderRepository.create({
       order_status: 'Pending',  // or other statuses as needed
       payment_id: payment.payment_id,
-      cart_id: createOrderDto.cart_id,
+      cart_id: decryptedCartId,
       totale_price: createOrderDto.total_price,  // Assuming cart has total_price
       is_deleted: false,
       payment,

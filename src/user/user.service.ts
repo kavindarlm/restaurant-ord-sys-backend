@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,31 +45,62 @@ export class UserService {
   }
 
   async login(loginUserDto: LoginUserDto): Promise<string> {
-  const user = await this.userRepository.findOne({
-    where: { user_email: loginUserDto.user_email },
-  });
+    const user = await this.userRepository.findOne({ where: { user_email: loginUserDto.user_email } });
+    if (!user || !user.user_password) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+    if (!loginUserDto.user_password) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
 
-  if (!user) {
-    throw new Error('Invalid email or password');
+    const now = new Date();
+
+    // Check if account is locked
+    if (user.locked_until) {
+      const lockedUntil = new Date(user.locked_until);
+      
+      // Check if 15 minutes have passed since lock
+      if (now < lockedUntil) {
+        // Account is still locked
+        const remainingMs = lockedUntil.getTime() - now.getTime();
+        const remainingMinutes = Math.ceil(remainingMs / 60000);
+        const remainingSeconds = Math.ceil((remainingMs % 60000) / 1000);
+        throw new UnauthorizedException(`Account is locked. Please wait ${remainingMinutes} minute(s) and ${remainingSeconds} second(s) before trying again.`);
+      } else {
+        // 15 minutes have passed, unlock the account
+        user.failed_login_attempts = 0;
+        user.locked_until = null;
+        await this.userRepository.save(user);
+      }
+    }
+
+    const isPasswordValid = await bcrypt.compare(loginUserDto.user_password, user.user_password);
+    
+    if (!isPasswordValid) {
+      // Increment failed login attempts
+      user.failed_login_attempts += 1;
+
+      // Lock account if failed attempts reach 3
+      if (user.failed_login_attempts >= 3) {
+        const lockUntil = new Date(now.getTime() + 15 * 60000); // 15 minutes from now
+        user.locked_until = lockUntil;
+        await this.userRepository.save(user);
+        throw new UnauthorizedException('Account locked due to multiple failed login attempts. Please try again after 15 minutes.');
+      }
+
+      await this.userRepository.save(user);
+      throw new UnauthorizedException(`Invalid email or password. ${3 - user.failed_login_attempts} attempt(s) remaining before account lock.`);
+    }
+
+    // Successful login - reset failed attempts
+    if (user.failed_login_attempts > 0) {
+      user.failed_login_attempts = 0;
+      user.locked_until = null;
+      await this.userRepository.save(user);
+    }
+
+    const payload = { email: user.user_email, sub: user.user_id, role: user.user_role };
+    const token = this.jwtService.sign(payload);
+    return token;
   }
-
-  const isPasswordValid = await bcrypt.compare(
-    loginUserDto.user_password,
-    user.user_password
-  );
-
-  if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
-  }
-
-  const payload = {
-    email: user.user_email,
-    sub: user.user_id,
-    role: user.user_role,
-  };
-
-  return this.jwtService.sign(payload);
-}
-
-
 }

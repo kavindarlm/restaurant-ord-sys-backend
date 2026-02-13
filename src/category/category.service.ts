@@ -4,17 +4,34 @@ import { Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private uploadService: UploadService,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const category = this.categoryRepository.create(createCategoryDto);
-    return this.categoryRepository.save(category);
+  async create(createCategoryDto: CreateCategoryDto, file?: Express.Multer.File): Promise<any> {
+    // Upload image to Supabase if file is provided
+    let category_image_url = null;
+    if (file) {
+      category_image_url = await this.uploadService.uploadCategoryImage(file);
+    }
+
+    const category = this.categoryRepository.create({
+      ...createCategoryDto,
+      category_image_url,
+    });
+    const savedCategory = await this.categoryRepository.save(category);
+
+    return {
+      success: true,
+      message: 'Category created successfully',
+      data: savedCategory,
+    };
   }
 
   async findAll(): Promise<Category[]> {

@@ -5,13 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cart } from './entities/cart.entity';
 import { Table } from 'src/table/entities/table.entity';
 import { TableModule } from 'src/table/table.module';
+import { EncryptionService } from '../common/encryption.service';
 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Cart, Table]),
 TableModule],
   controllers: [CartController],
-  providers: [CartService], // Add TableRepository to providers
+  providers: [CartService, EncryptionService], // Add TableRepository to providers
   exports: [CartService],
 })
 export class CartModule {}
