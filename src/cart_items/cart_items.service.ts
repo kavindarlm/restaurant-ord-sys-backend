@@ -5,6 +5,7 @@ import { CartItem } from './entities/cart_item.entity';
 import { CreateCartItemDto } from './dto/create-cart_item.dto';
 import { UpdateCartItemDto } from './dto/update-cart_item.dto';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { EncryptionService } from 'src/common/encryption.service';
 
 @Injectable()
 export class CartItemService {
@@ -13,14 +14,18 @@ export class CartItemService {
     private cartItemRepository: Repository<CartItem>,
     @InjectRepository(Cart)
     private cartRepository: Repository<Cart>,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async create(createCartItemDto: CreateCartItemDto): Promise<CartItem> {
     const { quantity, dish_id, cart_id, is_deleted } = createCartItemDto;
+
+    // decrypt cart_id and convert to number
+    const decryptedCartId = this.encryptionService.decrypt(cart_id);
   
     // Find the associated cart
     const cart = await this.cartRepository.findOne({
-      where: { cart_id, is_deleted: false, is_active: true },
+      where: { cart_id: Number(decryptedCartId), is_deleted: false, is_active: true },
       relations: ['cartItems'],
     });
   

@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart_items/entities/cart_item.entity';
 import { DishPrice } from 'src/dish/entities/dish_price.entity';
 import { SecurityLoggerService } from 'src/security-logging/security-logger.service';
+import { EncryptionService } from 'src/common/encryption.service';
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ export class StripePaymentService {
     private dishPriceRepo: Repository<DishPrice>,
 
     private readonly securityLogger: SecurityLoggerService,
+
+    private readonly encryptionService: EncryptionService,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-11-20.acacia',
@@ -32,7 +35,9 @@ export class StripePaymentService {
   }
 
   // Create a payment intent
-  async createPaymentIntent(cartId: number, currency: string, totalAmount: number) {
+  async createPaymentIntent(encryptedId: string, currency: string, totalAmount: number) {
+    const cartId = this.encryptionService.decrypt(encryptedId);
+    console.log(`Decrypted cart ID: ${cartId}`);
     const cart = await this.cartRepo.findOne({
       where: { cart_id: cartId, is_deleted: false },
     });
@@ -46,7 +51,7 @@ export class StripePaymentService {
         cart: { cart_id: cartId },
         is_deleted: false,
       },
-      relations: ['dish'],
+      relations: ['dish'], 
     });
 
     if (!cartItems.length) {

@@ -4,7 +4,7 @@ export class CreateCartItemDto {
 
   dish_id: number;
 
-  cart_id: number;
+  cart_id: string;
 
   is_deleted?: boolean;
 }

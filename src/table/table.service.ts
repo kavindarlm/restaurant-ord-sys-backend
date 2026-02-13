@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Table } from './entities/table.entity'; // Correct import for Table
 import * as QRCode from 'qrcode';
+import { EncryptionService } from '../common/encryption.service';
 
 @Injectable()
 export class TableService {
   constructor(
     @InjectRepository(Table)
     private readonly tableRepository: Repository<Table>,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async create(createTableDto: CreateTableDto) {
@@ -20,8 +22,11 @@ export class TableService {
       table.table_name = createTableDto.table_name || 'New Table';
       await this.tableRepository.save(table);
 
-      // Generate QR code for the table
-      const qrData = `http://localhost:3000/hotelMenuPageCustomer/${table.table_id}`;
+      // Encrypt table_id for secure URL
+      const encryptedTableId = this.encryptionService.encrypt(table.table_id);
+      
+      // Generate QR code with encrypted table_id
+      const qrData = `http://localhost:3000/hotelMenuPageCustomer/${encodeURIComponent(encryptedTableId)}`;
       const qrCode = await QRCode.toDataURL(qrData);
 
       // Save the QR code URL to the table
